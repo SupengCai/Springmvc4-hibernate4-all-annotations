@@ -1,12 +1,15 @@
 package com.wechat.controller;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.wechat.dao.IUserService;
+import com.wechat.model.User;
 
 /**
  * <p>
@@ -22,7 +25,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 public class CommonController {
 
-
+	@Resource  
+    private IUserService userService; 
+	
 	/**
 	 * 搜索地点提示
 	 * 
@@ -34,6 +39,9 @@ public class CommonController {
 //	、、	org.springframework.ui.velocity.VelocityEngineFactory
 //		org.codehaus.jackson.map.ObjectMapper
 //		com.thoughtworks.xstream.converters.ConverterLookup
+		//org.hibernate.SessionFactory
+		User aUser=userService.load( 1 );
+		System.out.println(aUser.getName());
 		return "nuist/index";
 	}
 

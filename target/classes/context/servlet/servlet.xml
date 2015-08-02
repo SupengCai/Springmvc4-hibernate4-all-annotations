@@ -12,25 +12,17 @@
       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
 
-	<bean
-		class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
-		<property name="messageConverters">
-			<list>
-				<bean
-					class="org.springframework.http.converter.StringHttpMessageConverter">
-					<property name="supportedMediaTypes">
-						<list>
-							<value>text/html;charset=UTF-8</value>
-						</list>
-					</property>
-				</bean>
-			</list>
-		</property>
-	</bean>
+	<!-- <bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter"> 
+		<property name="messageConverters"> <list> <bean class="org.springframework.http.converter.StringHttpMessageConverter"> 
+		<property name="supportedMediaTypes"> <list> <value>text/html;charset=UTF-8</value> 
+		</list> </property> </bean> </list> </property> </bean> -->
+
 	<context:component-scan base-package="com.wechat.controller" />
 
 	<tx:annotation-driven transaction-manager="transactionManager" />
 
+	<!-- 注册DefaultAnnotationHandlerMapping与 AnnotationMethodHandlerAdapter 两个bean, 
+		是spring MVC为@Controllers分发请求所必须的 -->
 	<mvc:annotation-driven />
 
 	<!-- 静态资源映射 -->
@@ -46,7 +38,7 @@
 		<property name="configLocation"
 			value="classpath:/context/velocity/velocity.properties" />
 	</bean>
-	
+
 	<bean id="viewResolver"
 		class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
 		<!-- 在没有扩展名时即: "/user/1" 时的默认展现形式 -->

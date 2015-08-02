@@ -10,9 +10,6 @@
 			http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.0.xsd
 			http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
 			http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd">
-	<!-- 从resin.conf中获取配置的数据源，正式环境下建议使用这种配置方式！ <bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean"> 
-		<property name="jndiName"> <value>java:comp/env/jdbc/abizDatabase</value> 
-		</property> </bean> -->
 
 	<!-- 配置在项目中的数据源 <property name="validationQuery" value="select 1" /> -->
 	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"
@@ -37,23 +34,74 @@
 		<property name="removeAbandonedTimeout" value="6000000" />
 	</bean>
 
-	<!-- <jee:jndi-lookup id="dataSource" jndi-name="jdbc/mysql"/> -->
-
-	<bean id="transactionManager"
-		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+	<!-- 创建spring的sessionfactory工厂 -->
+	<bean id="sessionFactory"
+		class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+		<!-- 注入数据源 -->
 		<property name="dataSource" ref="dataSource" />
+		<!-- 设置spring去哪个包中查找相应的实体类 -->
+		<property name="packagesToScan">
+			<list>
+				<value>com.wechat.model</value>
+			</list>
+		</property>
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.dialect">org.hibernate.dialect.MySQL5Dialect</prop>
+				<prop key="hibernate.format_sql">false</prop>
+				<prop key="hibernate.show_sql">true</prop>
+				<!-- 如果开启, Hibernate将在SQL中生成有助于调试的注释信息, 默认值为false. 取值 true | false -->
+				<prop key="hibernate.use_sql_comments">false</prop>
+				<!-- Fetch Size 是设定JDBC的Statement读取数据的时候每次从数据库中取出的记录条数。 -->
+				<prop key="hibernate.jdbc.fetch_size">50</prop>
+				<!-- Batch Size是设定对数据库进行批量删除，批量更新和批量插入的时候的批次大小 -->
+				<prop key="hibernate.jdbc.batch_size">25</prop>
+				<!-- 允许使用外连接抓取.取值. true | false -->
+				<prop key="hibernate.use_outer_join">true</prop>
+				<!-- 外连接抓取树的最大深度,建议在0到3之间 -->
+				<prop key="hibernate.max_fetch_depth">1</prop>
+				<!-- 强制Hibernate按照被更新数据的主键，为SQL更新排序。这么做将减少在高并发系统中事务的死锁。 取值 true | false -->
+				<prop key="hibernate.order_updates">true</prop>
+				<!-- 如果开启, Hibernate将收集有助于性能调节的统计数据.取值true|false -->
+				<prop key="hibernate.generate_statistics">true</prop>
+				<prop key="hibernate.hbm2ddl.auto">update</prop>
+			</props>
+		</property>
 	</bean>
-	<!--
-	<bean id="sqlMapClient" class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
-		<property name="configLocation"
-			value="classpath:context/datasource/sql-map-config.xml" />
-		<property name="dataSource" ref="dataSource" />
-	</bean> -->
+	
+	<!-- 开启HibernateTemplate，并且为其注入SessionFactory 使用HibernateTemplate不太方便的就是要获取session得通过getSessionFactory()方法获取 -->
+	<bean id="hibernateTemplate" class="org.springframework.orm.hibernate3.HibernateTemplate">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
 
-	<!-- <bean id="accountLoginDAOImpl" class="com.linklife.dao.impl.AccountLoginDAOImpl"> 
-		<property name="sqlMapClient" ref="sqlMapClient"/> </bean> <bean id="accountInfoDAOImpl" 
-		class="com.linklife.dao.impl.AccountInfoDAOImpl"> <property name="sqlMapClient" 
-		ref="sqlMapClient"/> </bean> <bean id="lifeTrackDAOImpl" class="com.linklife.dao.impl.LifeTrackDAOImpl"> 
-		<property name="sqlMapClient" ref="sqlMapClient"/> </bean> -->
+	<!-- 开启配置事务拦截器 -->
+	<bean id="transactionManager"
+		class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+		<property name="sessionFactory" ref="sessionFactory"></property>
+	</bean>
+
+	<!-- 基本事务定义，使用transactionManager做事务管理，默认get*，find*方法的事务为read-only -->
+	<tx:advice id="txAdvice" transaction-manager="transactionManager">
+		<tx:attributes>
+			<tx:method name="find*" read-only="true" />
+			<tx:method name="get*" read-only="true" />
+			<tx:method name="add*" propagation="REQUIRED" />
+			<tx:method name="update*" propagation="REQUIRED" />
+			<tx:method name="delete*" propagation="REQUIRED" />
+			<tx:method name="save*" propagation="REQUIRED" />
+			<tx:method name="*" propagation="REQUIRED" />
+		</tx:attributes>
+	</tx:advice>
+
+	<!-- 配置aop， spring是通过aop来进行事务管理的 -->
+	<aop:config>
+		<!-- 设置pointCut表示那些方法要加入事务处理 -->
+		<!-- 以下的事务是声明在dao中的，但是通常都会在service来处理多个业务对象逻辑的关系，注入删除，更新等，此时如果在执行了一个步骤之后抛出异常 
+			就会导致数据不完整，所以事务不应该在dao层处理，而应在service，这也是spring所提供的一个非常方便的工具，声明式事务 -->
+		<aop:pointcut id="interceptorPointCuts"
+			expression="execution(* com.wechat.dao.*.*(..))" />
+		<!-- 通过advisor来确定具体要加入事务控制的方法 -->
+		<aop:advisor advice-ref="txAdvice" pointcut-ref="interceptorPointCuts" />
+	</aop:config>
 
 </beans>

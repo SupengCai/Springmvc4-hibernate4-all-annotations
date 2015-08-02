@@ -15,7 +15,7 @@
 	<context:component-scan base-package="com.wechat.service.impl" />
 	<context:component-scan base-package="com.wechat.domain" />
 	<context:component-scan base-package="com.wechat.trigger" />
-	<context:component-scan base-package="com.wechat.redis" />
+	<context:component-scan base-package="com.wechat.dao" />
 
 
 </beans>

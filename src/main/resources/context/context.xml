@@ -14,8 +14,8 @@
 		location="classpath:/context/properties/context.properties" />
 	<!-- 这里面存放import的组织方式，不存放任何具体的配置信息 -->
 
-	<!-- DataSource配置 
-	<import resource="datasource/datasource.xml" />-->
+	<!-- DataSource配置 -->
+	<import resource="datasource/datasource.xml" />
 
 	<!-- 加载特别定义的类的配置 -->
 	<import resource="bean/bean-context.xml" />

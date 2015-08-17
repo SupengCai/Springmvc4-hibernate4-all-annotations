@@ -45,6 +45,18 @@ public class CommonController {
 		return "nuist/index";
 	}
 
+	/**
+	 * 搜索地点提示
+	 * 
+	 * @param String
+	 * @return String
+	 */
+	@RequestMapping( value = "/index" )
+	public String index( String region, String query ) {
+		
+		return "wechat/index";
+	}
+	
 
 	/**
 	 * 给开发者的建议

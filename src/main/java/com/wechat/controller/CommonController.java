@@ -40,8 +40,8 @@ public class CommonController {
 //		org.codehaus.jackson.map.ObjectMapper
 //		com.thoughtworks.xstream.converters.ConverterLookup
 		//org.hibernate.SessionFactory
-		User aUser=userService.load( 1 );
-		System.out.println(aUser.getName());
+		//User aUser=userService.load( 1 );
+		//System.out.println(aUser.getName());
 		return "nuist/index";
 	}
 
@@ -54,7 +54,7 @@ public class CommonController {
 	@RequestMapping( value = "/index" )
 	public String index( String region, String query ) {
 		
-		return "wechat/index";
+		return "nuist/index3";
 	}
 	
 
